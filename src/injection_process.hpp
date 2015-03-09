@@ -1,0 +1,145 @@
+#ifndef _INJECTION_PROCESS_HPP_
+#define _INJECTION_PROCESS_HPP_
+
+#include <string>
+#include <vector>
+#include "globals.hpp"
+#include <iostream>
+#include "misc.cpp"
+
+class InjectionProcess;
+class InjectionProcessUniform;
+class InjectionProcessBurst;
+class InjectionProcessGaussian;
+class InjectionProcessOnOff;
+class InjectionProcessMultiTime;
+
+// Traffic pattern class
+// Only uniform pattern for now.
+// Want to make it a template that can change to different classes later
+class InjectionProcess
+{
+    protected:
+        string m_id, m_type;
+        bool m_ready;
+        int m_seed, m_grp_size;
+
+    public:
+       // Constructor for uniform 
+       InjectionProcess(string id, string type)
+        : m_id(id), m_type(type), m_ready(false) { }; 
+       InjectionProcess(string id, string type, int seed)
+        : m_id(id), m_type(type), m_ready(false), m_seed(seed) { }; 
+
+       static InjectionProcess * New(vector<string> *str_params);
+
+       // This is for UNIFORM
+       virtual ~InjectionProcess();
+       virtual void init(int group_size);
+
+       string get_type() { return m_type; }
+       string get_id() { return m_id; }
+
+       virtual double get_inj_rate(int cycle);
+       virtual int parse_params(vector<string> *str_params);
+
+       virtual InjectionProcess* clone() const
+          { return (new InjectionProcess(*this)); }
+       
+};
+
+class InjectionProcessUniform: public InjectionProcess
+{
+    public:
+      InjectionProcessUniform(string id, string type)
+        : InjectionProcess(id, type) { }; 
+      InjectionProcessUniform(string id, string type, int seed)
+        : InjectionProcess(id, type, seed) { }; 
+
+      double get_inj_rate(int cycle);
+      int parse_params(vector<string> *str_params);
+
+      InjectionProcess* clone() const
+          { return (new InjectionProcessUniform(*this)); }
+
+    private:
+       double m_rate;
+};
+
+class InjectionProcessBurst: public InjectionProcess
+{
+    public:
+      InjectionProcessBurst(string id, string type)
+        : InjectionProcess(id, type) { }; 
+      InjectionProcessBurst(string id, string type, int seed)
+        : InjectionProcess(id, type, seed) { }; 
+
+      double get_inj_rate(int cycle);
+      int parse_params(vector<string> *str_params);
+
+      InjectionProcess* clone() const
+          { return (new InjectionProcessBurst(*this)); }
+
+    private:
+       int m_period;
+       int  m_cycle_high;
+       bool m_start_low;
+       double m_rate_base;
+       double m_rate_high;
+};
+
+// Injection process where injection rate exhibits a periodic peak,
+// with the peaks shaped in a guassian curve
+class InjectionProcessGaussian: public InjectionProcess
+{
+    public:
+      InjectionProcessGaussian(string id, string type)
+        : InjectionProcess(id, type) { }; 
+      InjectionProcessGaussian(string id, string type, int seed)
+        : InjectionProcess(id, type, seed) { }; 
+
+      double get_inj_rate(int cycle);
+      int parse_params(vector<string> *str_params);
+
+      InjectionProcess* clone() const
+          { return (new InjectionProcessGaussian(*this)); }
+
+    private:
+       int m_period;
+       int  m_offset;
+       double m_rate_peak; // packets per cycle per node.
+       double m_std_dev; // in cycles
+
+       double inv_twovar;
+
+};
+
+
+class InjectionProcessOnOff: public InjectionProcess
+{
+    public:
+      InjectionProcessOnOff(string id, string type)
+        : InjectionProcess(id, type) { }; 
+      InjectionProcessOnOff(string id, string type, int seed)
+        : InjectionProcess(id, type, seed) { }; 
+
+      void init(int group_size);
+      double get_inj_rate(int cycle);
+      int parse_params(vector<string> *str_params);
+
+      InjectionProcess* clone() const
+          { return (new InjectionProcessOnOff(*this)); }
+
+    private:
+       double m_alpha;
+       double m_beta;
+       double m_r1;
+       vector<int> m_state;
+       string m_init_state;
+
+       int m_prev_cyc;
+       int m_counter;
+};
+
+
+#endif
