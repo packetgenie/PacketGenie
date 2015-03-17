@@ -1,0 +1,34 @@
+Required dependency:
+ - Boost C++ libraries: regex, program_options, lexical_cast
+
+
+How to get/install Boost:
+ Option 1.
+ - Get Boost library from: http://www.boost.org/
+   Latest is preferred, but can support boost_1.41.
+   Install it in your system. (/usr/lib64/boost)
+   ex.) You are running this on one of the batman servers.
+   
+ Option 2.
+ - Alternatively, you can take the include.tar file in the ariel folder
+   /net/vips/projects/ariel/include.tar and put the include/ folder
+   in the top-level directory. 
+   This is a cut-down version of the 
+   boost library with only the code required for the simulator.
+
+=== Building the Code ===
+1) Open Makefile
+2) If you already have an existing boost library installed in your 
+   machine, uncomment this part of the Makefile:
+            BOOST_FLAG = -lboost
+            BOOST_LINK = -lboost_program_options -lboost_regex
+   OR. if you chose to install boost library in a local directory,
+       uncomment this part. Make sure BOOSTDIR points to where your
+       boost library is located.
+            BOOSTDIR   = include/boost_1_56_0
+            BOOSTLIB   = $(BOOSTDIR)/stage/lib
+            BOOST_LINK = $(BOOSTLIB)/libboost_program_options.a \
+  					             $(BOOSTLIB)/libboost_regex.a
+3) Close Makefile
+4) Run make
+5) Executable will be in bin/
