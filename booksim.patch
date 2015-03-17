@@ -1,0 +1,121 @@
+diff -ruN orig/booksim_config.cpp new/booksim_config.cpp
+--- orig/booksim_config.cpp	2015-03-17 01:59:18.652778196 -0400
++++ new/booksim_config.cpp	2015-03-17 01:59:01.346394952 -0400
+@@ -196,13 +196,13 @@
+ 
+   // Control assignment of packets to VCs
+   _int_map["read_request_begin_vc"] = 0;
+-  _int_map["read_request_end_vc"] = 5;
+-  _int_map["write_request_begin_vc"] = 2;
+-  _int_map["write_request_end_vc"] = 7;
+-  _int_map["read_reply_begin_vc"] = 8;
+-  _int_map["read_reply_end_vc"] = 13;
+-  _int_map["write_reply_begin_vc"] = 10;
+-  _int_map["write_reply_end_vc"] = 15;
++  _int_map["read_request_end_vc"] = -1;
++  _int_map["write_request_begin_vc"] = -1;
++  _int_map["write_request_end_vc"] = -1;
++  _int_map["read_reply_begin_vc"] = -1;
++  _int_map["read_reply_end_vc"] = -1;
++  _int_map["write_reply_begin_vc"] = 11;
++  _int_map["write_reply_end_vc"] = -1;
+ 
+   // Control Injection of Packets into Replicated Networks
+   _int_map["read_request_subnet"] = 0;
+diff -ruN orig/globals.hpp new/globals.hpp
+--- orig/globals.hpp	2015-03-17 01:59:18.653778234 -0400
++++ new/globals.hpp	2015-03-17 01:59:01.347394974 -0400
+@@ -38,6 +38,9 @@
+ class Stats;
+ Stats * GetStats(const std::string & name);
+ 
++class InterconnectInterface;
++extern InterconnectInterface *g_icnt_interface;
++
+ extern bool gPrintActivity;
+ 
+ extern int gK;
+diff -ruN orig/main.cpp new/main.cpp
+--- orig/main.cpp	2015-03-17 01:59:18.653778234 -0400
++++ new/main.cpp	2015-03-17 01:59:01.348394996 -0400
+@@ -53,16 +53,19 @@
+ #include "network.hpp"
+ #include "injection.hpp"
+ #include "power_module.hpp"
+-
++#include "interconnect_interface.hpp"
+ 
+ 
+ ///////////////////////////////////////////////////////////////////////////////
+ //Global declarations
+ //////////////////////
++// Interconnect Interface instance
++InterconnectInterface *g_icnt_interface;
+ 
+  /* the current traffic manager instance */
+ TrafficManager * trafficManager = NULL;
+ 
++#if 0
+ int GetSimTime() {
+   return trafficManager->getTime();
+ }
+@@ -75,6 +78,21 @@
+   }
+   return test;
+ }
++#else
++int GetSimTime() {
++    return g_icnt_interface->GetIcntTime();  
++}
++
++class Stats;
++Stats * GetStats(const std::string & name) {
++  Stats* test =  g_icnt_interface->GetIcntStats(name);
++  if(test == 0){   
++    cout<<"warning statistics "<<name<<" not found"<<endl;     
++  }
++  return test;
++}
++
++#endif
+ 
+ /* printing activity factor*/
+ bool gPrintActivity;
+diff -ruN orig/trafficmanager.cpp new/trafficmanager.cpp
+--- orig/trafficmanager.cpp	2015-03-17 01:59:18.655778295 -0400
++++ new/trafficmanager.cpp	2015-03-17 01:59:01.350395040 -0400
+@@ -39,6 +39,7 @@
+ #include "random_utils.hpp" 
+ #include "vc.hpp"
+ #include "packet_reply_info.hpp"
++#include "noctrafficmanager.hpp"
+ 
+ TrafficManager * TrafficManager::New(Configuration const & config,
+                                      vector<Network *> const & net)
+@@ -49,6 +50,8 @@
+         result = new TrafficManager(config, net);
+     } else if(sim_type == "batch") {
+         result = new BatchTrafficManager(config, net);
++    } else if(sim_type == "noc") {
++        result = new NoCTrafficManager(config,net);
+     } else {
+         cerr << "Unknown simulation type: " << sim_type << endl;
+     } 
+diff -ruN orig/trafficmanager.hpp new/trafficmanager.hpp
+--- orig/trafficmanager.hpp	2015-03-17 01:59:18.655778295 -0400
++++ new/trafficmanager.hpp	2015-03-17 01:59:01.350395040 -0400
+@@ -265,12 +265,12 @@
+   virtual void _RetireFlit( Flit *f, int dest );
+ 
+   void _Inject();
+-  void _Step( );
++  virtual void _Step( );
+ 
+   bool _PacketsOutstanding( ) const;
+   
+   virtual int  _IssuePacket( int source, int cl );
+-  void _GeneratePacket( int source, int size, int cl, int time );
++  virtual void _GeneratePacket( int source, int size, int cl, int time );
+ 
+   virtual void _ClearStats( );
+ 
