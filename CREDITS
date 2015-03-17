@@ -1,0 +1,15 @@
+The following files were adapted from University of Toronto's GPGPU-Sim project:
+src/icnt_wrapper.hpp
+src/icnt_wrapper.cpp
+integration_code/globals.hpp
+integration_code/interconnect_interface.cpp
+integration_code/interconnect_interface.hpp
+integration_code/intersim_config.cpp
+integration_code/intersim_config.hpp
+integration_code/lex.yy.c
+integration_code/main.cpp
+integration_code/Makefile
+integration_code/noctrafficmanager.cpp
+integration_code/noctrafficmanager.hpp
+integration_code/y.tab.c
+integration_code/y.tab.h
