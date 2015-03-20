@@ -24,7 +24,7 @@
 #  						$(BOOSTLIB)/libboost_regex.a
 ##################################################################
 #### OR - you have boost installed in your system already ########
-#####     such as /usr/lib64														  ########
+####      such as /usr/lib64														  ########
 ##################################################################
 BOOST_FLAG = -lboost
 BOOST_LINK = -lboost_program_options -lboost_regex
