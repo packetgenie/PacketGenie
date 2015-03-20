@@ -206,8 +206,7 @@ void NodeGroup::print_stat()
 {
     cout << "Node Group: " << m_id << endl
          << "Group Size: " << get_size() << endl
-         << "Total Packets Generated: " << stat_tot_pckt_gen << endl
-         << "Avg. Group Injection Rate: " << stat_avg_inj_rate/g_clock << endl;
+         << "Total Packets Generated: " << stat_tot_pckt_gen << endl;
     // Loop through the nodes in the group.
     for (list<Node *>::iterator it = m_nodes->begin();
          it != m_nodes->end(); ++it)
