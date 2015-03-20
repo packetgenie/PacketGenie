@@ -836,8 +836,13 @@ int Network::print_traffic_records()
     
     cout << g_traffic_report->generate_str_report() << endl;
 
-    if (gBookSim)
+
+    if (gBookSim) 
+    {
+      cout << "== BookSim Statistics ==" << endl;
       icnt_display_overall_stats(); 
+      cout << "== End BookSim Statistics ==" << endl;
+    }
 
     return SUCCESS;
 
