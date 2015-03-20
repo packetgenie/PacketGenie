@@ -17,7 +17,7 @@ diff -ruN orig/booksim_config.cpp new/booksim_config.cpp
 +  _int_map["write_request_end_vc"] = -1;
 +  _int_map["read_reply_begin_vc"] = -1;
 +  _int_map["read_reply_end_vc"] = -1;
-+  _int_map["write_reply_begin_vc"] = 11;
++  _int_map["write_reply_begin_vc"] = -1;
 +  _int_map["write_reply_end_vc"] = -1;
  
    // Control Injection of Packets into Replicated Networks
