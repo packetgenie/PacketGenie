@@ -211,30 +211,15 @@ int main(int argc, char** argv)
           unsigned int top_dim_x, top_dim_y;
           unsigned int simclk_end;
                   
+          // Parse basic network and simulation parameters.
           top_type = get_strvec(param_map, "-topology_type")[0];
           top_dim_x = boost::lexical_cast<unsigned int>
                                   (get_strvec(param_map, "-topology_type")[1]);
           top_dim_y = boost::lexical_cast<unsigned int>
                                   (get_strvec(param_map, "-topology_type")[2]);
 
-         // simclk_step = boost::lexical_cast<unsigned int>
-         //                         (get_strvec(param_map, "-simclk_step")[0]);
           simclk_end = boost::lexical_cast<unsigned int>
                                   (get_strvec(param_map, "-simclk_end")[0]);
-
-
-          // Parse out traffic pattern, injection process, and receivers.
-          // Setup the variables in Network
-          // 
-/*
-          inj_rate= boost::lexical_cast<double>
-                                  (get_strvec(param_list, "-traffic_inj_rate")[0]);
-          traffic_process = get_strvec(param_list, "-traffic_dist")[0];
-*/
-         
-          // Assign the parameters to node types.
-          // NEED TO WRITE PARSE ASSIGN FUNCTION
-
 
 
           if (gPrint)
