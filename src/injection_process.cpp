@@ -72,7 +72,7 @@ void InjectionProcess::init(int group_size)
 }
 
 // Get the per-cycle injection rate of a network at current cycle.
-double InjectionProcess::get_inj_rate(int cycle)
+double InjectionProcess::get_inj_rate(long cycle)
 {
     assert(m_ready);
     return 0;
@@ -86,10 +86,15 @@ int InjectionProcess::parse_params(vector<string> *str_params)
 
 
 // InjectionProcess - Uniform
-double InjectionProcessUniform::get_inj_rate(int cycle)
+double InjectionProcessUniform::get_inj_rate(long cycle)
 {
     assert(m_ready);
-    return m_rate;
+    if ( (m_end != 0) && (cycle > m_end))
+	return 0;
+    else if (cycle >= m_start)
+    	return m_rate;
+    else
+	return 0;
 }
 
 
@@ -102,17 +107,36 @@ int InjectionProcessUniform::parse_params(vector<string> *str_params)
 
     m_rate = boost::lexical_cast<double>(str_params->at(2));
 
+    if ( str_params->size() > 3 )
+    {
+	if (str_params->at(3) == "start")
+    	    m_start = boost::lexical_cast<size_t>(str_params->at(4));
+	
+	if (str_params->at(5) == "end")
+    	    m_end = boost::lexical_cast<size_t>(str_params->at(6));
+
+    }
+
     return SUCCESS;
   
 }
 
 
 // InjectionProcess - Burst
-double InjectionProcessBurst::get_inj_rate(int cycle)
+double InjectionProcessBurst::get_inj_rate(long cycle)
 {
     assert(m_ready);
 
-    int cycle_pos = cycle % m_period;  
+    size_t rcycle;
+
+    if ( (m_end != 0) && (cycle > m_end))
+	return 0;
+    else if (cycle >= m_start)
+	rcycle = cycle - m_start;  
+    else
+	return 0;
+
+    long cycle_pos = rcycle % m_period;  
 
     if (m_start_low)
         cycle_pos = m_period - cycle_pos;
@@ -128,11 +152,12 @@ int InjectionProcessBurst::parse_params(vector<string> *str_params)
 {
     // Burst should have had seven parameters (may also have empty strings at end)
     //   <inj_id> <type> <period> <dut_cycle> <start_low> <rate_base> <rate_high>
+    //   <inj_id> <type> <period> <dut_cycle> <start_low> <rate_base> <rate_high> start <start> end < end>
     if ( str_params->size() < 7)
         return ERROR;
 
 
-    m_period = boost::lexical_cast<int>(str_params->at(2));
+    m_period = boost::lexical_cast<long>(str_params->at(2));
 
     double dut =  boost::lexical_cast<double>(str_params->at(3));
     m_cycle_high = (dut * m_period);
@@ -149,16 +174,35 @@ int InjectionProcessBurst::parse_params(vector<string> *str_params)
     m_rate_base = boost::lexical_cast<double>(str_params->at(5));
     m_rate_high = boost::lexical_cast<double>(str_params->at(6));
     
+
+    if ( (str_params->size() > 7))
+    {
+	if (str_params->at(7) == "start")
+    	    m_start = boost::lexical_cast<long>(str_params->at(8));
+	
+	if (str_params->at(9) == "end")
+    	    m_end = boost::lexical_cast<long>(str_params->at(10));
+
+    }
+
     return SUCCESS;
 }
 
 // InjectionProcess - Gaussian
-double InjectionProcessGaussian::get_inj_rate(int cycle)
+double InjectionProcessGaussian::get_inj_rate(long cycle)
 {
     assert(m_ready);
     // Compensate for offset and periodic behavior.
     // Center around the period.
-    double x_pos = ((cycle - m_offset) % m_period);
+    size_t rcycle;
+    if ( (m_end != 0) && (cycle > m_end))
+	return 0;
+    else if (cycle >= m_start)
+	rcycle = cycle - m_start;  
+    else
+	return 0;
+
+    double x_pos = ((rcycle - m_offset) % m_period);
     if (x_pos > (m_period/2.0))
         x_pos = m_period - x_pos;
 
@@ -177,16 +221,24 @@ int InjectionProcessGaussian::parse_params(vector<string> *str_params)
         return ERROR;
 
 
-    m_period = boost::lexical_cast<int>(str_params->at(2));
+    m_period = boost::lexical_cast<long>(str_params->at(2));
 
     // Offset should not exceed the period.
-    m_offset = ( boost::lexical_cast<int>(str_params->at(3)) ) % m_period;
+    m_offset = ( boost::lexical_cast<long>(str_params->at(3)) ) % m_period;
 
     m_rate_peak = boost::lexical_cast<double>(str_params->at(4));
     m_std_dev = boost::lexical_cast<double>(str_params->at(5));
 
     inv_twovar = 1.0 / (2 * pow(m_std_dev, 2.0));
 
+    if ( (str_params->size() > 6))
+    {
+	if (str_params->at(6) == "start")
+    	    m_start = boost::lexical_cast<long>(str_params->at(7));
+	
+	if (str_params->at(8) == "end")
+    	    m_end = boost::lexical_cast<long>(str_params->at(9));
+    }
     return SUCCESS;
 }
 
@@ -218,7 +270,7 @@ void InjectionProcessOnOff::init(int group_size)
 }
 
 
-double InjectionProcessOnOff::get_inj_rate(int cycle)
+double InjectionProcessOnOff::get_inj_rate(long cycle)
 {
     assert(m_ready);
     assert(cycle >= 0);

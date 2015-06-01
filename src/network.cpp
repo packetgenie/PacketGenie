@@ -592,6 +592,7 @@ int Network::init_sim(size_t cycle_end)
     // INITIALIZE GLOBAL CLOCK
     g_clock = 0;
     sim_end = cycle_end;
+    g_clock_end = sim_end;
 
     g_traffic_report = new TrafficReportHandler(m_ntwk_size, sim_end);
 

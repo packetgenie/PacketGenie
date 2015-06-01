@@ -24,6 +24,7 @@ bool gRuntime = false;
 bool gWaitForReply = false;
 
 size_t g_clock = 0;
+size_t g_clock_end = 0;
 
 
 TrafficReportHandler* g_traffic_report = NULL;

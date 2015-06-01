@@ -40,14 +40,15 @@ class InjectionProcess
     protected:
         string m_id, m_type;
         bool m_ready;
+        long m_start, m_end;
         int m_seed, m_grp_size;
 
     public:
        // Constructor for uniform 
        InjectionProcess(string id, string type)
-        : m_id(id), m_type(type), m_ready(false) { }; 
+        : m_id(id), m_type(type), m_ready(false), m_start(0), m_end(0) { }; 
        InjectionProcess(string id, string type, int seed)
-        : m_id(id), m_type(type), m_ready(false), m_seed(seed) { }; 
+        : m_id(id), m_type(type), m_ready(false), m_start(0), m_end(0), m_seed(seed) { }; 
 
        static InjectionProcess * New(vector<string> *str_params);
 
@@ -58,7 +59,7 @@ class InjectionProcess
        string get_type() { return m_type; }
        string get_id() { return m_id; }
 
-       virtual double get_inj_rate(int cycle);
+       virtual double get_inj_rate(long cycle);
        virtual int parse_params(vector<string> *str_params);
 
        virtual InjectionProcess* clone() const
@@ -74,7 +75,7 @@ class InjectionProcessUniform: public InjectionProcess
       InjectionProcessUniform(string id, string type, int seed)
         : InjectionProcess(id, type, seed) { }; 
 
-      double get_inj_rate(int cycle);
+      double get_inj_rate(long cycle);
       int parse_params(vector<string> *str_params);
 
       InjectionProcess* clone() const
@@ -92,15 +93,15 @@ class InjectionProcessBurst: public InjectionProcess
       InjectionProcessBurst(string id, string type, int seed)
         : InjectionProcess(id, type, seed) { }; 
 
-      double get_inj_rate(int cycle);
+      double get_inj_rate(long cycle);
       int parse_params(vector<string> *str_params);
 
       InjectionProcess* clone() const
           { return (new InjectionProcessBurst(*this)); }
 
     private:
-       int m_period;
-       int  m_cycle_high;
+       long m_period;
+       long m_cycle_high;
        bool m_start_low;
        double m_rate_base;
        double m_rate_high;
@@ -116,15 +117,15 @@ class InjectionProcessGaussian: public InjectionProcess
       InjectionProcessGaussian(string id, string type, int seed)
         : InjectionProcess(id, type, seed) { }; 
 
-      double get_inj_rate(int cycle);
+      double get_inj_rate(long cycle);
       int parse_params(vector<string> *str_params);
 
       InjectionProcess* clone() const
           { return (new InjectionProcessGaussian(*this)); }
 
     private:
-       int m_period;
-       int  m_offset;
+       long m_period;
+       long  m_offset;
        double m_rate_peak; // packets per cycle per node.
        double m_std_dev; // in cycles
 
@@ -142,7 +143,7 @@ class InjectionProcessOnOff: public InjectionProcess
         : InjectionProcess(id, type, seed) { }; 
 
       void init(int group_size);
-      double get_inj_rate(int cycle);
+      double get_inj_rate(long cycle);
       int parse_params(vector<string> *str_params);
 
       InjectionProcess* clone() const
@@ -155,8 +156,8 @@ class InjectionProcessOnOff: public InjectionProcess
        vector<int> m_state;
        string m_init_state;
 
-       int m_prev_cyc;
-       int m_counter;
+       long m_prev_cyc;
+       long m_counter;
 };
 
 

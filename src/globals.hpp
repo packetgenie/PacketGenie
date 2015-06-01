@@ -57,6 +57,7 @@ extern bool gRuntime;
 extern bool gWaitForReply;
 
 extern size_t g_clock;
+extern size_t g_clock_end;
 extern TrafficReportHandler* g_traffic_report;
 
 extern tf_gen::Network* g_network;
