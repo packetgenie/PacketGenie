@@ -76,6 +76,22 @@ namespace tf_gen
       bool reply_queue_empty()
       { return m_rply_q->empty(); }
 
+      long get_start_cyc()
+      { return m_inj_proc->get_start(); }
+
+      long get_end_cyc()
+      { return m_inj_proc->get_end(); }
+
+      bool is_active()
+      { 
+         if (m_inj_proc->get_start() > g_clock)
+           return false;
+         if (m_inj_proc->get_end() < g_clock)
+           return false;
+         else
+           return true;
+      }
+
       int init();
 
       int process_reply_queue();

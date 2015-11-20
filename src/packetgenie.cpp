@@ -416,7 +416,7 @@ int main(int argc, char** argv)
                 it_param != it_range.second; ++it_param)
           {
               error = my_network.set_node_group(&(it_param->second));
-              if (error)
+              if (error & (error != ERROR_IGNORE))
               {
                   cerr << "ERROR: ERROR SETTING GROUPS" << endl;
                   return error;

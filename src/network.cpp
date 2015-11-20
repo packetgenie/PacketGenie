@@ -388,6 +388,12 @@ int Network::set_node_group(vector<string> *str_params)
     sen_it = sender_map->find(sen_id);
     rec_it = receiver_map->find(rec_id);
 
+    // We do not support packets injected to itself.
+    list<Node *> send_nodes = sen_it->second.nodes;
+    vector<Node *> recv_nodes = rec_it->second.nodes;
+    if ((send_nodes.size()-recv_nodes.size() == 0) & (send_nodes.front() == recv_nodes.front()))
+        return ERROR_IGNORE;
+
     // Check if the ids were found.
     if ( inj_it == inj_proc_map->end()     ||
          tp_it  == traf_pattern_map->end() ||
@@ -683,16 +689,19 @@ int Network::step()
 #if _DEBUG
         cout << "At Node Group: " << curr_grp->get_id() << endl;
 #endif
-        if (m_status == NETWORK_STATUS_ACTIVE || !gWaitForReply)
+        if (curr_grp->is_active()) 
         {
-            error = curr_grp->wake_each_node();
-            if (error)
-                return error;
+          if (m_status == NETWORK_STATUS_ACTIVE || !gWaitForReply)
+          {
+              error = curr_grp->wake_each_node();
+              if (error)
+                  return error;
+          }
+  
+          error = curr_grp->process_reply_queue();
+          if (error)
+              return error;
         }
-
-        error = curr_grp->process_reply_queue();
-        if (error)
-            return error;
     }
 
     error = process_all_packet_queues();

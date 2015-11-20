@@ -58,6 +58,8 @@ class InjectionProcess
 
        string get_type() { return m_type; }
        string get_id() { return m_id; }
+       long get_start() { return m_start; }
+       long get_end() { return m_end; }
 
        virtual double get_inj_rate(long cycle);
        virtual int parse_params(vector<string> *str_params);

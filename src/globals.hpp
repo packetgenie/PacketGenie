@@ -19,7 +19,7 @@
 #ifndef _GLOBALS_HPP_
 #define _GLOBALS_HPP_
 
-#define _DEBUG 0 
+#define _DEBUG 0
 
 #define _BOOKSIM 1 
 
@@ -34,6 +34,7 @@ namespace
     const extern int SUCCESS = 0;
     const extern int ERROR = -1;
     const extern int ERROR_IN_CMDLN = -2;
+    const extern int ERROR_IGNORE = -3;
 }
 
 namespace tf_gen

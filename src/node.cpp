@@ -166,7 +166,7 @@ int Node::generate_packet(NodeGroup* group)
     cout << "NodeGroup= " << group->get_id() << "\t | "
          << "SrcIdx= " << m_idx << "\t | "
          << "DestIdx= " << dest_node->get_idx() << "\t | "
-         << "Packet= " << new_packet->id << endl;
+        << "Packet= " << new_packet->get_id() << endl;
 #endif
 
 #if _BOOKSIM
