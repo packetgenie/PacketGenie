@@ -105,9 +105,10 @@ int InjectionProcessUniform::parse_params(vector<string> *str_params)
     if ( str_params->size() < 3) 
         return ERROR;
 
+
     m_rate = boost::lexical_cast<double>(str_params->at(2));
 
-    if ( str_params->size() > 3 )
+    if ( str_params->size() > 4 )
     {
 	if (str_params->at(3) == "start")
     	    m_start = boost::lexical_cast<size_t>(str_params->at(4));

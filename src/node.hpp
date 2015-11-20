@@ -30,6 +30,7 @@
 #include "traffic_pattern.hpp"
 #include "packet.hpp"
 #include "reply_job.hpp"
+#include "node_configs.hpp"
 #include "traffic_report_handler.hpp"
 
 #if _BOOKSIM
@@ -39,8 +40,8 @@
 //class tf_gen::Node;
 //class tf_gen::NodeGroup;
 class ReplyPacketHandler;
-class PacketBuffer;
-class Dram;
+//class PacketBuffer;
+//class Dram;
 
 namespace tf_gen
 {
@@ -106,7 +107,7 @@ namespace tf_gen
       int wake_node(NodeGroup * group);
 
       // for Node Config - Buffer
-      int config_buffer(PacketBuffer &new_buffer);
+      int config_buffer(PacketBuffer* new_buffer);
 
       // for Node Config - Dram
       bool is_dram()
@@ -154,7 +155,7 @@ namespace tf_gen
       size_t stat_pckt_recv;
 
       // Variables for Node Config - Buffer
-      list<PacketBuffer> *buffer_list;
+      list<PacketBuffer*> *buffer_list;
       map<string,PacketBuffer*> *buffer_map;
 
       // Variables for Node Config - Dram

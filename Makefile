@@ -36,7 +36,7 @@ BOOKSIMDIR      = src/intersim/
 export BOOKSIM_OBJDIR=$(BUILD_ROOT)/obj/intersim/
 
 CC        = g++
-CFLAGS    = -c -Wall -Wno-unused-function
+CFLAGS    = -c -Wall -Wno-unused-function -O3
 LDFLAGS   = 
 INCLUDE   = -I $(BOOSTDIR) $(BOOST_FLAG)
 OBJDIR    = obj/

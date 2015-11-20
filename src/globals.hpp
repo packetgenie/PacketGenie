@@ -43,6 +43,8 @@ namespace tf_gen
     class Network;
     class Packet;
     class Port;
+    class PacketBuffer;
+    class Dram;
 }
 
 using namespace std;

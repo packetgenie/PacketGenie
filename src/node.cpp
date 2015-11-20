@@ -18,7 +18,6 @@
 
 #include "node.hpp"
 #include "node_group.hpp"
-#include "node_configs.hpp"
 #include "packet_handler.hpp"
 #include <iostream>
 #include <cstdlib>
@@ -56,6 +55,11 @@ Node::~Node()
 {
     if (m_config.buffer)
     {
+    	for(list<PacketBuffer*>::iterator it = buffer_list->begin();
+	    it != buffer_list->end(); ++it)
+	{
+            delete (*it);
+	}
         delete buffer_list;
         delete buffer_map;
     }
@@ -189,6 +193,8 @@ int Node::generate_packet(NodeGroup* group)
                 if (buffer->check())
                 {
                     buffer->push(new_packet);
+		    if (buffer->get_type() == TYPE_QUEUE)
+			return SUCCESS;
                 }
                 else
                 {
@@ -224,6 +230,24 @@ int Node::process_send_queue()
         create_traffic_incident(curr_pckt);
         send_queue.pop();
         ++pckt_count;
+    }
+
+    if (m_config.buffer) 
+    {
+    	for(list<PacketBuffer*>::iterator it = buffer_list->begin();
+	    it != buffer_list->end(); ++it)
+	{
+            if ((*it)->get_type() == TYPE_QUEUE)
+	    {
+		curr_pckt = ((PacketQueue*)*it)->front();
+		if (curr_pckt != NULL) {
+			create_traffic_incident(curr_pckt);
+			++pckt_count;
+		}
+	    }
+	}
+	
+
     }
 
 #if _BOOKSIM
@@ -364,7 +388,7 @@ int Node::process_packet_queues()
 }
 
 
-int Node::config_buffer(PacketBuffer &new_buffer)
+int Node::config_buffer(PacketBuffer* new_buffer)
 {
     PacketBuffer *buffer_ptr;
     vector<string> pckt_ids;
@@ -373,13 +397,13 @@ int Node::config_buffer(PacketBuffer &new_buffer)
     if (!m_config.buffer)
     {
         m_config.buffer = true;
-        buffer_list = new list<PacketBuffer>();
+        buffer_list = new list<PacketBuffer*>();
         buffer_map  = new map<string, PacketBuffer*>();
     }
 
     // Add new buffer to buffer list.
     buffer_list->push_back(new_buffer);
-    buffer_ptr = &(buffer_list->back());
+    buffer_ptr = buffer_list->back();
 
     pckt_ids = buffer_ptr->get_packet_ids();
 
@@ -399,10 +423,10 @@ int Node::config_buffer(PacketBuffer &new_buffer)
 
 void Node::update_buffers()
 {
-    for(list<PacketBuffer>::iterator it = buffer_list->begin();
+    for(list<PacketBuffer*>::iterator it = buffer_list->begin();
         it != buffer_list->end(); ++it)
     {
-        it->update();
+        (*it)->update();
     }
 }
 

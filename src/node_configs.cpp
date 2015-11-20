@@ -78,6 +78,87 @@ size_t PacketBuffer::update()
     return m_pckt_num;
 }
 
+////// PacketQueue
+PacketQueue::PacketQueue(size_t size, size_t delay,
+                           vector<string> packet_ids)
+  : PacketBuffer(size, delay, packet_ids),
+    m_front_active(false) 
+{
+}
+
+bool PacketQueue::check()
+{
+    // Check if the buffer is full
+    if (m_size == m_packet_queue.size())
+        return false;
+    else
+        return true;
+}
+
+size_t PacketQueue::push(Packet *packet)
+{
+    m_packet_queue.push(packet);
+    return m_pckt_num;
+}
+
+size_t PacketQueue::reply_received(ReplyPacket *packet)
+{
+    if (m_packet_queue.empty() || !m_front_active)
+	return 0;
+
+    Packet* curr_packet = m_packet_queue.front();
+    if (packet->get_src() == curr_packet->get_dest()) {
+	m_packet_queue.pop();
+	m_front_active = false;
+	--m_rqst_pending;
+    }
+    return m_packet_queue.size();
+}
+
+size_t PacketQueue::update()
+{
+
+    if (m_front_active)
+	++m_timer;
+
+    if (m_packet_queue.empty()) {
+	m_timer = 0;
+	return 0;
+    }
+
+    if (m_timer >= m_delay)
+    {
+        Packet* curr_packet = m_packet_queue.front();
+        if (curr_packet->get_type() == DEFAULT) {
+	    m_packet_queue.pop();
+	    m_front_active = false;
+	    --m_num_to_clear;
+	}
+        m_timer = 0;
+    }
+
+    return m_packet_queue.size();
+}
+
+Packet* PacketQueue::front()
+{
+	
+    if (m_packet_queue.empty() || m_front_active) {
+	return NULL;
+    } 
+    else {
+	Packet* front_packet = m_packet_queue.front();
+
+        if(front_packet->get_type() == REQUEST) {
+	    ++m_rqst_pending;
+	} 
+        else {
+	    ++m_num_to_clear;
+	}
+	m_front_active = true;
+	return front_packet;
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////
 //

@@ -455,7 +455,7 @@ int Network::config_nodes(vector<string> *str_params)
         nodes.push_back(&(node_list->at(*it)));
     }
 
-    if (config_type == "buffer")
+    if (config_type == "buffer" || config_type == "queue")
     {
         error = config_nodes_buffer(str_params, nodes);
         if (error)
@@ -489,6 +489,7 @@ int Network::config_nodes_buffer(vector<string> *str_params, list<Node*> &nodes)
     // [name] [type] [buffer_size] [delay_for_non-reply_packets] < [packets] >
     size_t buffer_size = boost::lexical_cast<size_t>(str_params->at(2));
     size_t delay  = boost::lexical_cast<double>(str_params->at(3));
+    string config_type = str_params->at(1);
     
     // Now get the packets
     vector<string> packet_ids;
@@ -513,11 +514,16 @@ int Network::config_nodes_buffer(vector<string> *str_params, list<Node*> &nodes)
         }
     }
 
-    PacketBuffer new_buffer (buffer_size, delay, packet_ids);
+
+    PacketBuffer* new_buffer;
     // Go through each node and config.
     for (list<Node*>::iterator node_it = nodes.begin();
          node_it != nodes.end(); ++node_it)
     {
+        if (config_type == "buffer")
+            new_buffer = new PacketBuffer(buffer_size, delay, packet_ids);
+        else
+	    new_buffer = (PacketBuffer*)(new PacketQueue(buffer_size, delay, packet_ids));
         error = (*node_it)->config_buffer(new_buffer);
         if (error)
             return error;

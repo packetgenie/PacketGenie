@@ -21,9 +21,19 @@
 
 #include <string>
 #include <vector>
+#include <queue>
 #include "packet.hpp"
 #include "globals.hpp"
 #include "misc.cpp"
+
+namespace tf_gen
+{
+
+enum BufferType
+{
+	TYPE_BUFFER = 0,
+	TYPE_QUEUE	
+};
 
 class PacketBuffer
 {
@@ -53,7 +63,11 @@ class PacketBuffer
           return m_packet_ids; 
       }
 
-  private:
+      BufferType get_type()
+      {	  return TYPE_BUFFER; }
+ 
+
+  protected:
       size_t m_size; // Size of the buffer
       size_t m_delay;
 
@@ -61,9 +75,33 @@ class PacketBuffer
       size_t m_timer;
       size_t m_pckt_num; // Number of packets in the buffer
       size_t m_rqst_pending;
-
+  private:
       vector<string> m_packet_ids;
 };
+
+
+class PacketQueue: public PacketBuffer
+{
+  public:
+      PacketQueue(size_t size, size_t delay, 
+                   vector<string> packet_ids);
+      bool check();
+      size_t push(Packet *packet);
+      size_t reply_received(ReplyPacket *packet);
+
+      size_t update();
+
+      Packet* front();
+      BufferType get_type()
+      {	  return TYPE_QUEUE; }
+
+  private:
+      queue<Packet *> m_packet_queue;
+      bool m_front_active;
+
+};
+
+
       // keep an actualy list of packets as a buffer if we want to be 
       // super accurate
       // Or at least a list with a counter.
@@ -103,7 +141,7 @@ class Dram
 };
 
 
-
+}
 
 
 
