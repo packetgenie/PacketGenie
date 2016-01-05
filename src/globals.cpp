@@ -22,6 +22,7 @@ bool gBookSim = false;
 bool gPrint = false;
 bool gRuntime = false;
 bool gWaitForReply = false;
+bool gNoOut = false;
 
 size_t g_clock = 0;
 size_t g_clock_end = 0;

@@ -36,6 +36,9 @@ Network::Network(NetworkType ntwk_type,
     node_list = new vector<Node>();
 
     group_list = new list<NodeGroup *>();
+    active_groups = new list<NodeGroup *>();
+    waiting_groups = new list<NodeGroup *>();
+    finished_groups = new list<NodeGroup *>();
 
     sender_map       = new map<string, senders_t>();
     receiver_map     = new map<string, receivers_t>();
@@ -70,6 +73,10 @@ Network::~Network()
     {
         delete *grp_it;
     }
+
+    delete active_groups;
+    delete waiting_groups;
+    delete finished_groups;
 
     delete group_list;
     delete sender_map;
@@ -632,12 +639,25 @@ int Network::init_sim(size_t cycle_end)
              << "Simclk end: " << sim_end << endl;
     }
 
+    NodeGroup * curr_grp;
+    long curr_next_event;
+    next_event_time = 0;
 
     // Initialize the injection processes in each node group.
     for (list<NodeGroup*>::iterator grp_it = group_list->begin();
          grp_it != group_list->end(); ++grp_it)
     {
-         (*grp_it)->init();
+	 curr_grp = *grp_it;
+         curr_grp->init();
+         if (curr_grp->is_active()) 
+	     active_groups->push_back(curr_grp);
+	 else {
+	     waiting_groups->push_back(curr_grp);
+	     curr_next_event = curr_grp->next_event();
+             if (curr_next_event < next_event_time && g_clock < curr_next_event)
+		next_event_time = curr_next_event;
+	 }
+	    
     }
 
     m_status = NETWORK_STATUS_READY;
@@ -650,7 +670,8 @@ int Network::init_sim(size_t cycle_end)
     return SUCCESS;
 }
                                               
-          
+  bool filter_nonactive(NodeGroup* m_grp) { return !m_grp->is_active(); }
+  bool filter_active(NodeGroup* m_grp) { return m_grp->is_active(); }
 int Network::step()
 {
 #if _DEBUG
@@ -682,15 +703,15 @@ int Network::step()
     // multiple times if they are in more than one group.
 
     // Loop through the group list.
-    for (list<NodeGroup*>::iterator grp_it = group_list->begin();
-         grp_it != group_list->end(); ++grp_it)
+    for (list<NodeGroup*>::iterator grp_it = active_groups->begin();
+         grp_it != active_groups->end(); ++grp_it)
     {
         curr_grp = *grp_it;      
 #if _DEBUG
         cout << "At Node Group: " << curr_grp->get_id() << endl;
 #endif
-        if (curr_grp->is_active()) 
-        {
+//        if (curr_grp->is_active()) 
+//        {
           if (m_status == NETWORK_STATUS_ACTIVE || !gWaitForReply)
           {
               error = curr_grp->wake_each_node();
@@ -701,7 +722,7 @@ int Network::step()
           error = curr_grp->process_reply_queue();
           if (error)
               return error;
-        }
+//        }
     }
 
     error = process_all_packet_queues();
@@ -747,8 +768,25 @@ int Network::step()
     ++g_clock;
     update_all_clocks();
 
+    if (g_clock >= next_event_time) {
+    	long curr_next_event;
+	active_groups->remove_if(filter_nonactive);
+
+        for (list<NodeGroup*>::iterator grp_it = waiting_groups->begin();
+           grp_it != waiting_groups->end(); ++grp_it)
+        {
+	    curr_grp = *grp_it;
+            if (curr_grp->is_active()) 
+	        active_groups->push_back(curr_grp);
+	    curr_next_event = curr_grp->next_event();
+            if (curr_next_event < next_event_time && g_clock < curr_next_event)
+       	        next_event_time = curr_next_event;
+	}    
+        waiting_groups->remove_if(filter_active);
+    }
     return SUCCESS;
 }
+
 
 bool Network::no_outstanding_reply()
 {

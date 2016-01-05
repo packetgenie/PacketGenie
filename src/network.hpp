@@ -42,6 +42,7 @@
 namespace tf_gen
 {
 
+
   enum NetworkType
   {
       NETWORK_MESH = 0,
@@ -123,7 +124,11 @@ namespace tf_gen
                                 // by step size
       size_t sim_end;
 
+      long next_event_time;
       list<NodeGroup*> *group_list; 
+      list<NodeGroup*> *active_groups; 
+      list<NodeGroup*> *waiting_groups; 
+      list<NodeGroup*> *finished_groups; 
 
       map<string, senders_t> *sender_map;
       map<string, receivers_t> *receiver_map;

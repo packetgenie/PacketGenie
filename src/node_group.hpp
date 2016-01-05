@@ -92,6 +92,16 @@ namespace tf_gen
            return true;
       }
 
+      long next_event()
+      {
+         if (m_inj_proc->get_start() > g_clock)
+           return m_inj_proc->get_start();
+	 else if (m_inj_proc->get_end() > g_clock)
+           return m_inj_proc->get_end();
+	 else
+	   return g_clock_end+1;
+      }
+
       int init();
 
       int process_reply_queue();

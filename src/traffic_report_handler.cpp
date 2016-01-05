@@ -54,6 +54,7 @@ void TrafficReportHandler::add_incident(Packet* packet)
     {
         cout << get_incident_str(new_incident);
     }
+
 }
 
 void TrafficReportHandler::get_all_records(list<traffic_incident_t> &record_out)

@@ -58,6 +58,7 @@ extern bool gBookSim;
 extern bool gPrint;
 extern bool gRuntime;
 extern bool gWaitForReply;
+extern bool gNoOut;
 
 extern size_t g_clock;
 extern size_t g_clock_end;

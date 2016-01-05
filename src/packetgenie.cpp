@@ -105,6 +105,7 @@ int main(int argc, char** argv)
       ("help,h", "Print help message")
       ("print,p", "Print results")
       ("runtime,r", "Print-as-you-go")
+      ("noout,n", "No output file")
       ("seed,s", po::value<unsigned int>(&randseed), "Random seed")
       ("config_file", po::value<string>(&config_file_path),
        "Configuration file for the traffic generator")
@@ -140,7 +141,7 @@ int main(int argc, char** argv)
         return SUCCESS;
       }
 
-      if (!vm.count("outfile"))
+      if (!vm.count("outfile") && !vm.count("noout"))
       {
         cout << "ERROR: Need to specify a output file" << endl
              << desc << endl << endl;
@@ -182,12 +183,18 @@ int main(int argc, char** argv)
     else
         gRuntime = false;
 
+    if (vm.count("noout"))
+	gNoOut = true;
+    else
+	gNoOut = false;
+
     
     multimap<string,vector<string> > param_map;
 
 #if _Debug
         cout << "Parsing success!" << endl;
         cout << "config_file: " << config_file_path << endl;
+     if (!gNoOut)
         cout << "Outfile to: " << outfile_path << endl;
 #endif
   
@@ -495,9 +502,11 @@ int main(int argc, char** argv)
    
 
           // Write result to file
+     if (!gNoOut) {
           string output;
           my_network.get_traffic_records(output);
           write_output(outfile_path, output);
+     }
 
 
         // Run traffic generator
